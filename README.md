@@ -1,6 +1,65 @@
-# Getting Started with Create React App
+# UT Austin Library AI Assistant
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An AI-powered chatbot designed to provide conversational and research assistance for the University of Texas at Austin Library. This assistant integrates multiple AI models to deliver comprehensive information access and research support.
+
+## Project Overview
+
+The UT Library AI Assistant provides:
+- Conversational question answering about library resources
+- Research assistance with multiple AI models (OpenAI, Google Gemini, Perplexity)
+- File upload capabilities for document analysis
+- Voice recognition for hands-free interaction
+
+## Architecture
+
+The application follows a modular architecture:
+- **Frontend**: React-based UI with component-based design
+- **Backend**: Express.js server with API proxies for AI services
+- **AI Service Layer**: Abstraction for multiple AI model integrations
+- **Containerization**: Docker setup for deployment
+
+## Getting Started
+
+### Running with Docker (Recommended)
+
+1. Clone the repository
+2. Create a `.env` file with your API keys:
+   ```
+   OPENAI_API_KEY=your_openai_api_key
+   GOOGLE_API_KEY=your_google_api_key
+   PERPLEXITY_API_KEY=your_perplexity_api_key
+   ```
+3. Build and run with Docker Compose:
+   ```
+   docker-compose up --build
+   ```
+4. Access the application at http://localhost:3000
+
+### Running Locally (Development)
+
+#### Frontend
+```
+npm install
+npm start
+```
+Access at http://localhost:3000
+
+#### Backend
+```
+cd backend
+npm install
+npm start
+```
+Backend runs at http://localhost:5000
+
+## Features
+
+- Multi-model AI support
+- Real-time conversation
+- Research assistance
+- Voice input capability
+- File upload and analysis
+- Model switching
 
 ## Available Scripts
 
