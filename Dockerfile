@@ -18,9 +18,14 @@ RUN npm run build
 # 使用nginx作为静态服务器
 FROM nginx:alpine
 COPY --from=0 /app/build /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf.template
+COPY docker-entrypoint.sh /
+
+# 设置脚本权限
+RUN chmod +x /docker-entrypoint.sh
 
 # 暴露端口
 EXPOSE 80
 
-# nginx默认会在前台启动
+# 设置自定义entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
