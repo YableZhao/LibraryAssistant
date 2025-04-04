@@ -1,23 +1,28 @@
 .chat-container {
-
-  max-width: 800px;
-  margin: 2rem auto;
+  width: 95%;
+  max-width: 900px;
+  margin: 1.5rem auto;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   background: white;
-  height: 600px;
+  height: calc(100vh - 6rem);
+  min-height: 500px;
+  max-height: 800px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .chat-header {
-  padding: 1rem;
+  padding: 1rem 1.5rem;
   background: #BF5700;
   color: white;
   border-radius: 12px 12px 0 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-indicator {
@@ -29,18 +34,21 @@
 
 .messages-container {
   flex: 1;
-  padding: 1rem;
+  padding: 1.5rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  background-color: #f9f9f9;
+  scroll-behavior: smooth;
 }
 
 .message {
-  max-width: 70%;
-  padding: 0.5rem 1rem;
-  border-radius: 1rem;
+  max-width: 75%;
+  padding: 0.75rem 1.25rem;
+  border-radius: 1.25rem;
   animation: fadeIn 0.3s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .user-message {
@@ -62,20 +70,32 @@
   word-break: break-word;
 }
 
-.input-container {
-  padding: 1rem;
+.input-form {
+  padding: 1rem 1.5rem 1.5rem;
+  background: white;
   border-top: 1px solid #e5e7eb;
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.input-container {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  position: relative;
 }
 
 input {
   flex: 1;
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
+  padding-right: 140px; /* Space for buttons */
   border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  border-radius: 1.5rem;
   outline: none;
   font-size: 1rem;
+  transition: all 0.2s ease;
+  background-color: #f9f9f9;
 }
 
 input:focus {
@@ -88,10 +108,13 @@ button {
   background: #BF5700;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 1.5rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 button:hover {
@@ -108,6 +131,53 @@ button:hover {
     transform: translateY(0);
   }
 } 
+
+.input-buttons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mic-button, .file-button {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  color: #666;
+}
+
+.mic-button:hover, .file-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: #BF5700;
+}
+
+.mic-button svg, .file-button svg, .send-button svg {
+  width: 18px;
+  height: 18px;
+}
+
+.send-button {
+  background-color: #BF5700;
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
 
 .voice-button {
   padding: 0.75rem;
@@ -130,6 +200,20 @@ button:hover {
   background: #BF5700;
   color: white;
   animation: pulse 1.5s infinite;
+  box-shadow: 0 0 0 4px rgba(191, 87, 0, 0.3);
+}
+
+.mic-button.recording svg {
+  display: none;
+}
+
+.mic-button.recording::after {
+  content: '';
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
 }
 
 @keyframes pulse {
@@ -177,7 +261,7 @@ button:hover {
 }
 
 button:disabled {
-  background: #ccc;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -187,53 +271,49 @@ button:disabled {
 }
 
 .file-upload-section {
-  display: none;
-  padding: 10px;
-  border-top: 1px solid #eee;
-}
-
-.file-upload-section.show {
-  display: block;
-}
-
-.upload-button {
-    background: #f5f5f5;
-    border: 1px solid #ddd;
-    padding: 8px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.upload-button:hover {
-    background: #e9e9e9;
+  padding: 0.75rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
 }
 
 .selected-files {
-    margin-top: 10px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.file-item {
-    background: #f0f0f0;
-    padding: 5px 10px;
-    border-radius: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.9em;
+.selected-file {
+  background: #f0f0f0;
+  padding: 0.4rem 0.75rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.05);
+  animation: fadeIn 0.3s ease;
 }
 
-.file-item button {
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: #666;
-    padding: 0 5px;
+.remove-file-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 0.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.remove-file-btn:hover {
+  background: rgba(0,0,0,0.1);
+  color: #ff3333;
 }
 
 .file-item button:hover {
@@ -243,21 +323,23 @@ button:disabled {
 .model-switcher {
   display: flex;
   justify-content: center;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.5rem;
-  background: #f3f4f6;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 1.5rem;
 }
 
 .model-button {
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-  background: white;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: white;
   cursor: pointer;
   transition: all 0.2s;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
 }
 
 .model-button:hover {
@@ -272,6 +354,80 @@ button:disabled {
 
 .model-button.active:hover {
   background: #A64B00;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chat-container {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    max-height: none;
+  }
+  
+  .chat-header {
+    border-radius: 0;
+    padding: 0.75rem 1rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .chat-header h2 {
+    font-size: 1.25rem;
+    margin: 0;
+  }
+  
+  .model-switcher {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .message {
+    max-width: 85%;
+  }
+  
+  .input-form {
+    padding: 0.75rem 1rem 1rem;
+  }
+  
+  .input-buttons {
+    gap: 0.25rem;
+  }
+  
+  .mic-button, .file-button {
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .messages-container {
+    padding: 1rem;
+  }
+  
+  .message {
+    max-width: 90%;
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .model-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+  }
+  
+  .input-container {
+    gap: 0.5rem;
+  }
+  
+  input {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+  }
+  
+  .send-button {
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+  }
 }
 
 /* Add styles for formatted sections */

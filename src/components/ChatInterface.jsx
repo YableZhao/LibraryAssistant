@@ -235,53 +235,77 @@ const ChatInterface = ({ initialMessages = [], onUpdateMessages }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder="Ask the UT Library Assistant..."
             disabled={isLoading}
           />
-          <button 
-            type="button" 
-            onClick={toggleRecording}
-            className={`mic-button ${isRecording ? 'recording' : ''}`}
-            disabled={isLoading}
-          >
-            🎤
-          </button>
-          <button 
-            type="button"
-            onClick={() => fileInputRef.current.click()}
-            className="file-button"
-            disabled={isLoading}
-          >
-            📎
-          </button>
+          <div className="input-buttons">
+            <button 
+              type="button" 
+              onClick={toggleRecording}
+              className={`mic-button ${isRecording ? 'recording' : ''}`}
+              disabled={isLoading}
+              aria-label="Record voice input"
+              title="Record voice input"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                <path d="M5 8a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5A.5.5 0 0 1 5 8z"/>
+              </svg>
+            </button>
+            <button 
+              type="button"
+              onClick={() => fileInputRef.current.click()}
+              className="file-button"
+              disabled={isLoading}
+              aria-label="Attach files"
+              title="Attach files"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/>
+              </svg>
+            </button>
+            <button 
+              type="submit" 
+              disabled={isLoading || !input.trim()}
+              className="send-button"
+              aria-label="Send message"
+              title="Send message"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M15.964.686a.5.5 0 0 0-.65-.65L.767 5.855H.766l-.452.18a.5.5 0 0 0-.082.887l.41.26.001.002 4.995 3.178 3.178 4.995.002.002.26.41a.5.5 0 0 0 .886-.083l6-15Zm-1.833 1.89L6.637 10.07l-.215-.338a.5.5 0 0 0-.154-.154l-.338-.215 7.494-7.494 1.178-.471-.47 1.178Z"/>
+              </svg>
+            </button>
+          </div>
         </div>
-        <button 
-          type="submit" 
-          disabled={isLoading || !input.trim()}
-          className="send-button"
-        >
-          Send
-        </button>
       </form>
 
-      <div className="file-upload-section">
-        <input
-          type="file"
-          multiple
-          onChange={handleFileSelect}
-          accept={CONFIG.app.allowedFileTypes.join(',')}
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-        />
-        <div className="selected-files">
-          {selectedFiles.map((file, index) => (
-            <div key={index} className="selected-file">
-              <span>{file.name}</span>
-              <button onClick={() => removeFile(file)}>×</button>
-            </div>
-          ))}
+      {selectedFiles.length > 0 && (
+        <div className="file-upload-section show">
+          <input
+            type="file"
+            multiple
+            onChange={handleFileSelect}
+            accept={CONFIG.app.allowedFileTypes.join(',')}
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+          />
+          <div className="selected-files">
+            {selectedFiles.map((file, index) => (
+              <div key={index} className="selected-file">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+                </svg>
+                <span>{file.name}</span>
+                <button onClick={() => removeFile(file)} className="remove-file-btn" aria-label="Remove file">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
