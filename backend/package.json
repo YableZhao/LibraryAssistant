@@ -8,14 +8,18 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.2.1",
+    "@langchain/community": "^0.3.40",
+    "@langchain/openai": "^0.5.5",
+    "axios": "^1.6.2",
+    "chromadb": "^2.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "langchain": "^0.3.21",
     "morgan": "^1.10.0",
-    "winston": "^3.11.0",
-    "axios": "^1.6.2",
-    "@google/generative-ai": "^0.2.1",
-    "openai": "^4.20.1"
+    "openai": "^4.20.1",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

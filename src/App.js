@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
 import ChatInterface from './components/ChatInterface';
+import AdminLayout from './components/Admin/AdminLayout';
+import KnowledgeBase from './components/Admin/KnowledgeBase';
 import './App.css';
 
 function App() {
@@ -26,12 +29,19 @@ function App() {
     ));
   };
 
-  return (
+  // Main chat component with conversations
+  const ChatApp = () => (
     <div className="app">
       <div className="sidebar">
-        <button className="new-chat-btn" onClick={handleNewChat}>
-          + New Chat
-        </button>
+        <div className="sidebar-header">
+          <button className="new-chat-btn" onClick={handleNewChat}>
+            + New Chat
+          </button>
+          <Link to="/admin/knowledge-base" className="admin-link">
+            <span className="admin-icon">⚙️</span>
+            <span className="admin-text">Knowledge Base</span>
+          </Link>
+        </div>
         <div className="conversation-list">
           {conversations.map(conv => (
             <div 
@@ -50,6 +60,18 @@ function App() {
         onUpdateMessages={(messages) => updateConversation(messages, activeConversation)}
       />
     </div>
+  );
+  
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<ChatApp />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Navigate to="/admin/knowledge-base" replace />} />
+          <Route path="knowledge-base" element={<KnowledgeBase />} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 

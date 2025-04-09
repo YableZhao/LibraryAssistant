@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
+import './MessageList.css';
 
 /**
- * Displays chat messages with support for formatted text and links
+ * Displays chat messages with support for formatted text, links and RAG sources
  */
 const MessageList = ({ messages, isLoading }) => {
   const formatMessageWithLinks = (text) => {
@@ -59,6 +60,53 @@ const MessageList = ({ messages, isLoading }) => {
     return finalElements;
   };
 
+  // State to track which messages have expanded sources
+  const [expandedSources, setExpandedSources] = useState({});
+
+  // Toggle expanded sources for a message
+  const toggleSources = (messageId) => {
+    setExpandedSources(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+
+  // Render sources if they exist
+  const renderSources = (message) => {
+    if (!message.sources || message.sources.length === 0) return null;
+    
+    const isExpanded = expandedSources[message.id];
+    
+    return (
+      <div className="message-sources">
+        <button 
+          className="sources-toggle"
+          onClick={() => toggleSources(message.id)}
+        >
+          {isExpanded ? 'Hide Sources' : `Show Sources (${message.sources.length})`}
+        </button>
+        
+        {isExpanded && (
+          <div className="sources-list">
+            {message.sources.map((source, index) => (
+              <div key={index} className="source-item">
+                <div className="source-header">
+                  <span className="source-number">[{source.id}]</span>
+                  <a href={source.url} target="_blank" rel="noopener noreferrer" className="source-link">
+                    {source.title || source.url}
+                  </a>
+                </div>
+                {source.snippet && (
+                  <div className="source-snippet">{source.snippet}</div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="messages-container">
       {messages.map((message) => (
@@ -68,6 +116,7 @@ const MessageList = ({ messages, isLoading }) => {
         >
           <div className="message-content">
             {formatMessageWithLinks(message.text)}
+            {message.sender === 'ai' && renderSources(message)}
           </div>
         </div>
       ))}
