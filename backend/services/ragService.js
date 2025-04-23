@@ -7,7 +7,7 @@ const { OpenAIEmbeddings } = require('@langchain/openai');
 const { CheerioWebBaseLoader } = require('@langchain/community/document_loaders/web/cheerio');
 const { TextLoader } = require('langchain/document_loaders/fs/text');
 const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
-const { MemoryVectorStore } = require('langchain/vectorstores/memory');
+const { Chroma } = require('@langchain/community/vectorstores/chroma');
 const { PromptTemplate } = require('@langchain/core/prompts');
 const winston = require('winston');
 
@@ -33,25 +33,41 @@ const embeddings = new OpenAIEmbeddings({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Define the name for the collection (still relevant conceptually)
+// Chroma Server URL (Default for local development)
+const CHROMA_URL = process.env.CHROMA_URL || 'http://localhost:8000';
+
+// Collection name
 const COLLECTION_NAME = 'ut_library_knowledge';
 
-// Singleton instance for the memory vector store
+// Singleton instance for the vector store
 let vectorStore;
 
 /**
- * Initialize and return the singleton MemoryVectorStore instance
+ * Initialize and return the singleton Chroma vector store instance connected via HTTP.
  */
 async function getVectorStore() {
   if (!vectorStore) {
     try {
-      // Initialize MemoryVectorStore *once* with empty documents
-      // Documents will be added via addWebpageToKnowledgeBase/addTextFileToKnowledgeBase
-      vectorStore = await MemoryVectorStore.fromDocuments([], embeddings);
-      logger.info(`Initialized new MemoryVectorStore for collection '${COLLECTION_NAME}'.`);
-    } catch (error) {
-      logger.error(`FATAL: Failed to initialize MemoryVectorStore. Error: ${error.message}`, { stack: error.stack });
-      throw new Error(`Failed to initialize MemoryVectorStore: ${error.message}`);
+      // Try to connect to an existing collection at the Chroma server URL
+      logger.info(`Attempting to connect to existing Chroma collection '${COLLECTION_NAME}' at ${CHROMA_URL}...`);
+      vectorStore = await Chroma.fromExistingCollection(embeddings, {
+        collectionName: COLLECTION_NAME,
+        url: CHROMA_URL,
+      });
+      logger.info(`Successfully connected to existing Chroma collection '${COLLECTION_NAME}'.`);
+    } catch (initError) {
+      // If connecting failed, assume the collection doesn't exist and create it
+      logger.warn(`Collection '${COLLECTION_NAME}' likely doesn't exist. Attempting to create it by adding dummy document... Error: ${initError.message}`);
+      try {
+        vectorStore = await Chroma.fromDocuments([], embeddings, { // Empty array to just create collection
+          collectionName: COLLECTION_NAME,
+          url: CHROMA_URL,
+        });
+        logger.info(`Successfully created and connected to new Chroma collection '${COLLECTION_NAME}'.`);
+      } catch (createError) {
+        logger.error(`FATAL: Failed to create or connect to Chroma collection '${COLLECTION_NAME}' at ${CHROMA_URL}. Error: ${createError.message}`, { stack: createError.stack });
+        throw new Error(`Failed to initialize Chroma vector store via HTTP: ${createError.message}`);
+      }
     }
   }
   return vectorStore;

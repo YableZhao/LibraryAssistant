@@ -9,6 +9,8 @@ const KnowledgeBase = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null); 
+  const [isFileLoading, setIsFileLoading] = useState(false); 
 
   useEffect(() => {
     // Clear message after 5 seconds
@@ -64,6 +66,63 @@ const KnowledgeBase = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Handler for selecting a file
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+      setMessage({ text: '', type: '' }); // Clear previous messages
+    }
+  };
+
+  // Handler for uploading the selected text file
+  const handleAddTextFile = async (e) => {
+    e.preventDefault();
+    if (!selectedFile) {
+      setMessage({ text: 'Please select a .txt file first', type: 'error' });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('textFile', selectedFile); // Key must match multer config on backend
+
+    try {
+      setIsFileLoading(true);
+      setMessage({ text: 'Uploading and processing file...', type: 'info' });
+      const response = await fetch('http://localhost:5001/api/rag/add-textfile', {
+        method: 'POST',
+        body: formData, // No 'Content-Type' header needed for FormData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ 
+          text: `Successfully added ${data.count} chunks from ${data.fileName}`, 
+          type: 'success' 
+        });
+        // Optionally, add to a list of processed files if needed
+        // setFiles([...files, { name: data.fileName, count: data.count, date: new Date().toISOString() }]);
+        setSelectedFile(null); // Clear the file input
+        // Reset file input element visually (requires ref or specific approach)
+        if (document.getElementById('file-input')) {
+          document.getElementById('file-input').value = '';
+        }
+      } else {
+        setMessage({ 
+          text: `Error: ${data.error || 'Failed to add file'}`, 
+          type: 'error' 
+        });
+      }
+    } catch (error) {
+      setMessage({ 
+        text: `Error: ${error.message}`, 
+        type: 'error' 
+      });
+    } finally {
+      setIsFileLoading(false);
     }
   };
 
@@ -159,7 +218,28 @@ const KnowledgeBase = () => {
           </div>
         </div>
       </div>
-      
+
+      <div className="admin-section">
+        <h2>Add Text File to Knowledge Base</h2>
+        <form onSubmit={handleAddTextFile} className="file-form">
+          <input
+            id="file-input" 
+            type="file"
+            onChange={handleFileChange}
+            accept=".txt" 
+            className="file-input"
+          />
+          <button 
+            type="submit" 
+            className="submit-button"
+            disabled={!selectedFile || isFileLoading}
+          >
+            {isFileLoading ? 'Uploading...' : 'Upload File'}
+          </button>
+        </form>
+        {selectedFile && <p className="selected-file">Selected: {selectedFile.name}</p>}
+      </div>
+
       <div className="admin-section">
         <h2>Search Knowledge Base</h2>
         <form onSubmit={handleSearch} className="search-form">

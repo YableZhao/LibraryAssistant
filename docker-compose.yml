@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # 前端服务
   frontend:
@@ -8,6 +6,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:80"
+    environment:
+      - BACKEND_URL=http://backend:5000
     depends_on:
       - backend
     networks:
@@ -20,16 +20,45 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5001:5000"
-    volumes:
-      - ./backend/logs:/app/logs
+    env_file:
+      - ./backend/.env
     environment:
       - NODE_ENV=production
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
-      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+      # Add Chroma URL for backend to connect to
+      - CHROMA_URL=http://chromadb:8000 
+      # API keys are loaded via env_file, commenting these out:
+      # - OPENAI_API_KEY=${OPENAI_API_KEY} 
+      # - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      # - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY}
+    # Mount named volumes for persistent uploads and logs
+    volumes:
+      - uploads-data:/app/uploads
+      - logs-data:/app/logs
+    networks:
+      - app-network
+    # Ensure ChromaDB starts before the backend
+    depends_on:
+      - chromadb
+
+  # ChromaDB RAG Service
+  chromadb:
+    image: chromadb/chroma:latest # Use the official ChromaDB image
+    ports:
+      - "8000:8000" # Expose ChromaDB port 8000 to the host
+    volumes:
+      - chroma-data:/chroma/chroma # Mount named volume for persistence
+    # Command to run inside the container - CORRECTED
+    command: "run --host 0.0.0.0 --port 8000 --path /chroma/chroma" 
     networks:
       - app-network
 
 networks:
   app-network:
     driver: bridge
+
+# Define the named volume for ChromaDB data persistence
+volumes:
+  chroma-data:
+  # Define volumes for backend uploads and logs
+  uploads-data:
+  logs-data:

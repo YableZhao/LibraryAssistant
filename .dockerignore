@@ -1,8 +1,23 @@
 node_modules
 npm-debug.log
 build
-.env
+
+# Replace specific .env with pattern + exception
+.env*
+!backend/.env
+
 .git
 .gitignore
 README.md
 .DS_Store
+
+# OS-specific files (add Thumbs.db)
+Thumbs.db
+
+# IDE/Editor files
+.vscode
+.idea
+
+# Runtime data directories we don't want copied into image
+backend/uploads/
+backend/logs/
