@@ -5,11 +5,11 @@
 
 const { OpenAIEmbeddings } = require('@langchain/openai');
 const { CheerioWebBaseLoader } = require('@langchain/community/document_loaders/web/cheerio');
+const { TextLoader } = require('langchain/document_loaders/fs/text');
 const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
-const { Chroma } = require('@langchain/community/vectorstores/chroma');
+const { MemoryVectorStore } = require('langchain/vectorstores/memory');
 const { PromptTemplate } = require('@langchain/core/prompts');
 const winston = require('winston');
-const path = require('path');
 
 // Configure logger
 const logger = winston.createLogger({
@@ -28,35 +28,30 @@ const logger = winston.createLogger({
   ]
 });
 
-// Path to store the ChromaDB
-const CHROMA_DIRECTORY = path.join(__dirname, '../data/chroma');
-
 // Initialize embeddings - we'll use OpenAI's embeddings for quality
 const embeddings = new OpenAIEmbeddings({
-  openAIApiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Collection name for UT Library documents
-const COLLECTION_NAME = 'ut_library_docs';
+// Define the name for the collection (still relevant conceptually)
+const COLLECTION_NAME = 'ut_library_knowledge';
 
-// Load or create vector store
+// Singleton instance for the memory vector store
 let vectorStore;
+
+/**
+ * Initialize and return the singleton MemoryVectorStore instance
+ */
 async function getVectorStore() {
   if (!vectorStore) {
     try {
-      // Try to load existing store
-      vectorStore = await Chroma.fromExistingCollection(
-        embeddings,
-        { collectionName: COLLECTION_NAME, url: `file://${CHROMA_DIRECTORY}` }
-      );
-      logger.info('Loaded existing vector store');
+      // Initialize MemoryVectorStore *once* with empty documents
+      // Documents will be added via addWebpageToKnowledgeBase/addTextFileToKnowledgeBase
+      vectorStore = await MemoryVectorStore.fromDocuments([], embeddings);
+      logger.info(`Initialized new MemoryVectorStore for collection '${COLLECTION_NAME}'.`);
     } catch (error) {
-      // Create new if not exists
-      logger.info('Creating new vector store');
-      vectorStore = new Chroma(
-        embeddings,
-        { collectionName: COLLECTION_NAME, url: `file://${CHROMA_DIRECTORY}` }
-      );
+      logger.error(`FATAL: Failed to initialize MemoryVectorStore. Error: ${error.message}`, { stack: error.stack });
+      throw new Error(`Failed to initialize MemoryVectorStore: ${error.message}`);
     }
   }
   return vectorStore;
@@ -98,6 +93,50 @@ async function addWebpageToKnowledgeBase(url) {
     return { success: true, count: enhancedDocs.length };
   } catch (error) {
     logger.error('Error adding webpage to knowledge base', { error: error.message });
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Add a text file to the knowledge base
+ * @param {string} filePath Path to the text file to index
+ */
+async function addTextFileToKnowledgeBase(filePath) {
+  try {
+    logger.info(`Adding text file to knowledge base: ${filePath}`);
+    
+    // Load the text file
+    const loader = new TextLoader(filePath);
+    const docs = await loader.load();
+    
+    // Split into manageable chunks
+    const textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+      chunkOverlap: 200,
+    });
+    const splitDocs = await textSplitter.splitDocuments(docs);
+    
+    // Add metadata to each document
+    const enhancedDocs = splitDocs.map(doc => {
+      // TextLoader might add some metadata already, let's preserve it
+      doc.metadata = { 
+        ...(doc.metadata || {}), 
+        source: filePath, // Override or set the source
+        added_at: new Date().toISOString() 
+      };
+      return doc;
+    });
+    
+    // Get the vector store
+    const store = await getVectorStore();
+    
+    // Add documents to the vector store
+    await store.addDocuments(enhancedDocs);
+    
+    logger.info(`Successfully added ${enhancedDocs.length} chunks from ${filePath}`);
+    return { success: true, count: enhancedDocs.length };
+  } catch (error) {
+    logger.error('Error adding text file to knowledge base', { filePath, error: error.message });
     return { success: false, error: error.message };
   }
 }
@@ -195,6 +234,7 @@ Your answer should be helpful, accurate, and based on the provided context. Incl
 
 module.exports = {
   addWebpageToKnowledgeBase,
+  addTextFileToKnowledgeBase,
   queryKnowledgeBase,
   enhancePromptWithKnowledge
 };
