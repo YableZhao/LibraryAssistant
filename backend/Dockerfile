@@ -1,22 +1,22 @@
 FROM node:18-alpine
 
-# 创建工作目录
+# Create working directory
 WORKDIR /app
 
-# 复制package.json和package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# 安装依赖
+# Install dependencies
 RUN npm install
 
-# 复制源代码
+# Copy source code
 COPY . .
 
-# 创建日志和上传目录
+# Create logs and uploads directories
 RUN mkdir -p logs uploads
 
-# 暴露端口
+# Expose port
 EXPOSE 5000
 
-# 启动应用
+# Start the application
 CMD ["npm", "start"]

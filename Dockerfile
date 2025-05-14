@@ -1,31 +1,31 @@
 FROM node:18-alpine
 
-# 创建工作目录
+# Create working directory
 WORKDIR /app
 
-# 复制package.json和package-lock.json
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# 安装依赖
+# Install dependencies
 RUN npm install
 
-# 复制源代码
+# Copy source code
 COPY . .
 
-# 构建应用
+# Build the application
 RUN npm run build
 
-# 使用nginx作为静态服务器
+# Use nginx as a static server
 FROM nginx:alpine
 COPY --from=0 /app/build /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf.template
 COPY docker-entrypoint.sh /
 
-# 设置脚本权限
+# Set script permissions
 RUN chmod +x /docker-entrypoint.sh
 
-# 暴露端口
+# Expose port
 EXPOSE 80
 
-# 设置自定义entrypoint
+# Set custom entrypoint
 ENTRYPOINT ["/docker-entrypoint.sh"]

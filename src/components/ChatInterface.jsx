@@ -19,7 +19,7 @@ const ChatInterface = ({ initialMessages = [], onUpdateMessages }) => {
   const [selectedModel, setSelectedModel] = useState('gemini');
   const fileInputRef = useRef(null);
 
-  // 不再直接初始化API客户端，而是使用服务层
+  // No longer directly initialize API client, use service layer instead
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window) {
@@ -58,11 +58,11 @@ const ChatInterface = ({ initialMessages = [], onUpdateMessages }) => {
     }
   };
 
-  // isLibraryQuery 函数已移除 - 未使用
+  // isLibraryQuery function removed - unused
 
-  // 使用服务层中的函数，此处不再需要本地实现
+  // Use functions from the service layer, local implementation no longer needed here
 
-  // getPerplexityResearchResults 函数已移除 - 使用服务层来处理
+  // getPerplexityResearchResults function removed - use service layer to handle
 
   const toggleRecording = () => {
     if (!recognition) {
@@ -100,7 +100,7 @@ const ChatInterface = ({ initialMessages = [], onUpdateMessages }) => {
     setSelectedFiles(selectedFiles.filter(file => file !== fileToRemove));
   };
 
-  // getUTLibrarySearchURL 函数已移除 - 未使用
+  // getUTLibrarySearchURL function removed - unused
 
   const formatMessageWithLinks = (text) => {
     const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -153,7 +153,7 @@ const ChatInterface = ({ initialMessages = [], onUpdateMessages }) => {
     try {
       let aiResponse;
 
-      // 使用服务层的generateAIResponse函数，统一处理不同模型的请求
+      // Use the generateAIResponse function from the service layer to handle requests for different models uniformly
       aiResponse = await generateAIResponse(input, selectedModel, messages);
 
       const aiMessage = {
